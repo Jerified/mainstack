@@ -38,6 +38,7 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Checkbox } from "./ui/checkbox";
+import Image from "next/image";
 
 export default function TransactionList() {
   const textPrimary = twMerge("text-gray-400 text-sm");
@@ -219,7 +220,7 @@ export default function TransactionList() {
                       setActiveDateFilter("Custom");
                     }
                   }}
-                  initialFocus
+    
                 />
               </PopoverContent>
             </Popover>
@@ -254,7 +255,6 @@ export default function TransactionList() {
                       setActiveDateFilter("Custom");
                     }
                   }}
-                  initialFocus
                 />
               </PopoverContent>
             </Popover>
@@ -487,11 +487,13 @@ export default function TransactionList() {
           Error loading transactions
         </div>
       ) : filteredTransactions.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">No transactions match your filters</p>
+        <div className="space-y-5 flex flex-col items-start w-[369px] justify-start mx-auto pt-24 pb-48">
+          <Image src={"/icons/icon.svg"} width={48} height={48} alt="No transactions" />
+          <p className="text-xl md:text-3xl font-bold">No matching transaction found for the selected filter</p>
+          <p className={textPrimary}>Change your filters to see more results, or add a new product.</p>
           <Button
-            variant="outline"
-            className="mt-4"
+            // variant="outline"
+            className="mt-4 button-primary rounded-[100px]"
             onClick={() => {
               setSelectedTransactionTypes([]);
               setSelectedStatuses([]);

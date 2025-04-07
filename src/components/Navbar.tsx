@@ -3,9 +3,8 @@
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { UserProfile } from './user-profile'
-import { motion, stagger, useAnimate } from 'framer-motion'
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet'
-import { Menu } from 'lucide-react'
+import { motion, stagger, useAnimate, AnimatePresence } from 'framer-motion'
+import { Menu, X } from 'lucide-react'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -19,9 +18,9 @@ const Navbar = () => {
     { title: "Apps", icon: "/icons/widgets.svg" }
   ]
 
-  const onOpenChange = (open: boolean) => {
-    setIsOpen(open)
-    if (open) {
+  const toggleMenu = () => {
+    setIsOpen(!isOpen)
+    if (!isOpen) {
       animate("li", 
         { opacity: 1, x: 0 },
         { delay: stagger(0.1, { startDelay: 0.15 }), 
@@ -99,79 +98,107 @@ const Navbar = () => {
             <UserProfile />
           </motion.div>
           
-          <Sheet open={isOpen} onOpenChange={onOpenChange}>
-            <SheetTrigger asChild>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="p-2 rounded-full"
-              >
-                <Menu className="h-6 w-6 text-[#56616B]" />
-              </motion.button>
-            </SheetTrigger>
-            
-            <SheetContent className="w-[80%] max-w-[300px] h-full">
-              <div className="flex items-center gap-2 mb-8 mt-4">
-                <Image src={"/mainstack-logo.png"} width={30} height={30} alt="logo" />
-                <span className="text-lg font-bold">Mainstack</span>
-              </div>
-              
-              <motion.ul 
-                ref={scope}
-                initial={{ opacity: 0 }}
-                className="space-y-4"
-              >
-                {navLinks.map((link, index) => (
-                  <motion.li
-                    key={index}
-                    initial={{ opacity: 0, x: 20 }}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 hover:bg-gray-100 ${link.title === "Revenue" ? "bg-gray-50" : ""}`}
-                  >
-                    <div className={`${link.title === "Revenue" ? "bg-blue-100 p-2 rounded-full" : ""}`}>
-                      <Image 
-                        src={link.icon} 
-                        width={link.title === "Revenue" ? 20 : 24} 
-                        height={link.title === "Revenue" ? 20 : 24} 
-                        alt={link.title} 
-                      />
-                    </div>
-                    <span className={`text-lg font-medium ${link.title === "Revenue" ? "text-blue-600" : "text-[#56616B]"}`}>
-                      {link.title}
-                    </span>
-                    {link.title === "Revenue" && (
-                      <span className="ml-auto px-2 py-1 text-xs font-bold text-white bg-blue-600 rounded-full">
-                        New
-                      </span>
-                    )}
-                  </motion.li>
-                ))}
-                
-                <div className="border-t border-gray-200 my-4"></div>
-                
-                <motion.li
-                  initial={{ opacity: 0, x: 20 }}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-all duration-300"
-                >
-                  <div className="bg-[#EFF1F6] p-2 rounded-full">
-                    <Image src="/icons/user.svg" width={20} height={20} alt="Profile" />
-                  </div>
-                  <span className="text-lg font-medium text-[#56616B]">Settings</span>
-                </motion.li>
-                
-                <motion.li
-                  initial={{ opacity: 0, x: 20 }}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-all duration-300"
-                >
-                  <div className="bg-[#EFF1F6] p-2 rounded-full">
-                    <Image src="/icons/chat.svg" width={20} height={20} alt="Support" />
-                  </div>
-                  <span className="text-lg font-medium text-[#56616B]">Support</span>
-                </motion.li>
-              </motion.ul>
-            </SheetContent>
-          </Sheet>
+          <motion.button
+            onClick={toggleMenu}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="p-2 rounded-full"
+            aria-label="Menu"
+          >
+            {isOpen ? (
+              <X className="h-6 w-6 text-[#56616B]" />
+            ) : (
+              <Menu className="h-6 w-6 text-[#56616B]" />
+            )}
+          </motion.button>
         </div>
       </div>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              onClick={toggleMenu}
+            />
+            
+            {/* Drawer Content */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 w-4/5 max-w-sm h-full bg-white z-50 shadow-xl md:hidden overflow-y-auto"
+            >
+              <div className="h-full flex flex-col">
+                {/* Drawer Header */}
+                <div className="flex items-center justify-between p-4 border-b">
+                  <div className="flex items-center gap-2">
+                    <Image 
+                      src={"/mainstack-logo.png"} 
+                      width={30} 
+                      height={30} 
+                      alt="logo" 
+                    />
+                    <span className="text-lg font-bold">Mainstack</span>
+                  </div>
+                  <button 
+                    onClick={toggleMenu} 
+                    className="p-2"
+                    aria-label="Close menu"
+                  >
+                    <X className="h-6 w-6 text-[#56616B]" />
+                  </button>
+                </div>
+
+                {/* Drawer Navigation Links - FIXED VISIBILITY */}
+                <div className="flex-1 p-4">
+                  <motion.ul 
+                    ref={scope}
+                    className="space-y-2"
+                  >
+                    {navLinks.map((link, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`flex items-center gap-3 p-3 rounded-lg transition-all duration-300 hover:bg-gray-100 ${
+                          link.title === "Revenue" ? "bg-gray-50" : ""
+                        }`}
+                      >
+                        <div className={`${
+                          link.title === "Revenue" 
+                            ? "bg-black/20 p-2 rounded-full" 
+                            : ""
+                        }`}>
+                          <Image 
+                            src={link.icon} 
+                            width={24} 
+                            height={24} 
+                            alt={link.title} 
+                          />
+                        </div>
+                        <span className={`text-lg font-medium ${
+                          link.title === "Revenue" 
+                            ? "text-black/50" 
+                            : "text-black"
+                        }`}>
+                          {link.title}
+                        </span>
+                      </motion.li>
+                    ))}
+                  </motion.ul>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </motion.header>
   )
 }
